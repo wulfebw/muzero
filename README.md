@@ -1,6 +1,2 @@
 
-# Python Module Template
-
-# Install
-
-# Documentation
+# MuZero

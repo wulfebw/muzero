@@ -1,12 +1,12 @@
 from setuptools import setup
 
-setup(name='python_package_template',
+setup(name='muzero',
       version='0.1',
-      description='A template for python packages',
-      author='<insert name>',
-      author_email='<insert email>',
+      description='python implementation of muzero',
+      author='wulfebw',
+      author_email='blake.w.wulfe@gmail.com',
       license='MIT',
-      packages=['python_package_template'],
+      packages=['muzero'],
       zip_safe=False,
       install_requires=[
         'numpy',
