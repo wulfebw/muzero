@@ -1,4 +1,5 @@
 import gym
+import matplotlib.pyplot as plt
 import numpy as np
 
 
@@ -30,8 +31,9 @@ class Maze(gym.Env):
         - The end is at one cell off the bottom-most and one cell off the right-most cell.
 
     Reward model:
-        - Entering the pit is negative one (-1) reward.
         - Exiting the maze is positive one (+1) reward.
+        - Entering the pit is negative one (-1) reward.
+
     
     Discount factor:
         - The discount factor of the mdp is 0.99.
@@ -116,17 +118,46 @@ class Maze(gym.Env):
         return 0, False
 
     def step(self, action):
-        self.state = self._get_next_state(action)
         reward, terminal = self._get_reward_terminal(self.state)
+        self.state = self._get_next_state(action)
         return self.state, reward, terminal, dict()
+
+    def transitions(self, state, action):
+        self.state = state
+        next_state, reward, terminal, _ = self.step(action)
+        return [(next_state, reward, terminal, 1.0)]
 
     def render(self):
         s = [["-" for _ in range(self.length)] for _ in range(self.height)]
+        # The state is (x, y), but when visualizing x = col, and y = row.
         s[self.state[1]][self.state[0]] = "*"
         for row in s:
             print("".join(row))
             print()
         print()
+
+    def render_value_function(self, v, mode="image"):
+        """Visualize a value function for this maze.
+
+        Args:
+            v: Dictionary mapping states to values.
+            mode: The render mode; either "text" or "image".
+        """
+        viz = np.empty((self.height, self.length))
+        for state, value in v.items():
+            # The state is (x, y), but when visualizing x = col, and y = row.
+            viz[state[1], state[0]] = value
+        if mode == "text":
+            print(viz)
+        elif mode == "image":
+            # This transform makes for a clearer visualization by spreading out the values.
+            # If the reward values are changed to something other than plus/minus 1 this won't work.
+            viz = viz ** 19
+            viz = (viz - np.min(viz)) / np.ptp(viz)
+            plt.imshow(viz, cmap="jet")
+            plt.show()
+        else:
+            raise NotImplementedError("Invalid mode: {}".format(mode))
 
 
 if __name__ == "__main__":
