@@ -99,6 +99,10 @@ class Maze(gym.Env):
 
     def _get_next_state(self, action):
         assert self.action_space.contains(action)
+
+        if self.state == self.pit_state or self.state == self.end_state:
+            return self.state
+
         dx, dy = self._action_index_to_dx_dy(action)
         x, y = self.state
         xp = min(max(x + dx, 0), self.length - 1)
@@ -118,8 +122,8 @@ class Maze(gym.Env):
         return 0, False
 
     def step(self, action):
-        reward, terminal = self._get_reward_terminal(self.state)
         self.state = self._get_next_state(action)
+        reward, terminal = self._get_reward_terminal(self.state)
         return self.state, reward, terminal, dict()
 
     def transitions(self, state, action):
@@ -152,7 +156,7 @@ class Maze(gym.Env):
         elif mode == "image":
             # This transform makes for a clearer visualization by spreading out the values.
             # If the reward values are changed to something other than plus/minus 1 this won't work.
-            viz = viz ** 19
+            viz = viz**19
             viz = (viz - np.min(viz)) / np.ptp(viz)
             plt.imshow(viz, cmap="jet")
             plt.show()
