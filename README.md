@@ -1,3 +1,3 @@
 
 # MuZero
-- A tabular implementation of [MuZero](https://arxiv.org/pdf/1911.08265.pdf).
+- A tabular implementation of [MuZero](https://arxiv.org/pdf/1911.08265.pdf) compatible with [gym](https://github.com/openai/gym).
