@@ -34,7 +34,6 @@ class Maze(gym.Env):
         - Exiting the maze is positive one (+1) reward.
         - Entering the pit is negative one (-1) reward.
 
-    
     Discount factor:
         - The discount factor of the mdp is 0.99.
         - A discount factor is used instead of a negative reward for taking a step
