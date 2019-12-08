@@ -17,7 +17,6 @@ class Edge:
     def __repr__(self):
         return f"p: {self.p}\nn: {self.n}\nr: {self.r}\nq: {self.q}"
 
-
 class Node:
     def __init__(self, state, prior, terminal=False):
         self.state = state
@@ -59,6 +58,7 @@ class MCTS(OnlinePlanningAlgorithm):
         return self._get_pi_v(root)
 
     def _uct_action(self, node):
+        """Select the maximum confidence bound action (appendix b, eq 2)."""
         n_total = sum(edge.n for edge in node.edges.values())
         best_score, best_a = -np.inf, None
         for a, edge in node.edges.items():
@@ -101,7 +101,8 @@ class MCTS(OnlinePlanningAlgorithm):
         return result
 
     def _get_pi_v(self, root):
-        pi = self._softmax({a: edge.q for (a, edge) in root.edges.items()})
+        # The policy is determined by the visit counts rather than the state-action value (appendix d).
+        pi = self._softmax({a: edge.n for (a, edge) in root.edges.items()})
         v = sum(prob * root.edges[a].q for (a, prob) in pi.items())
         return pi, v
 
@@ -109,7 +110,6 @@ class MCTS(OnlinePlanningAlgorithm):
         g = nx.Graph()
         edge_labels = root.add_to_graph(g)
         a = to_agraph(g)
-
         for k, edge_label in edge_labels.items():
             e = a.get_edge(*k)
             e.attr["label"] = edge_label
