@@ -5,6 +5,11 @@ import scipy.stats
 import muzero.planning.spaces_util as spaces_util
 
 
+def _assert_is_index(v):
+    assert isinstance(v, (int, np.integer)), "Value should be index, but got value: {} of type: {}".format(
+        v, type(v))
+
+
 class TabularModel:
     def __init__(self, observation_space, action_space, value_lr=0.1):
         """
@@ -27,6 +32,12 @@ class TabularModel:
         # a prior of ones for each action.
         self.pi = collections.defaultdict(lambda: np.ones(action_space.n))
 
+        self.value_lr = value_lr
+
+        # These are for debugging purposes.
+        self._i2s = spaces_util.get_index_to_space_converter(observation_space)
+        self._i2a = spaces_util.get_index_to_space_converter(action_space)
+
     def update(self, samples):
         """Update the parameters of this model using the samples (i.e., learning).
 
@@ -37,12 +48,16 @@ class TabularModel:
         for (s, a, r, sp, t, g) in samples:
             si = self.s2i(s)
             ai = self.a2i(a)
+            spi = self.s2i(sp)
             # "Learning" of the transition in the deterministic case just notes the transition.
-            self.t[(si, ai)] = (sp, r, t)
-            # Estimate the value function by incremental estimation.
+            self.t[(si, ai)] = (spi, r, t)
+            # Incremental estimation of the value function.
             self.v[si] -= self.value_lr * (self.v[si] - g)
             # Each time we take an action in a state, we increment the dirichlet prior count.
             self.pi[si][ai] += 1
+
+        pi, v = self.env_pi_v()
+        return dict(pi=pi, v=v)
 
     def represent(self, s):
         """Represent a state with an internal representation.
@@ -65,18 +80,19 @@ class TabularModel:
         We also return "terminal" (whether (s, a, s') is a terminal transition).
 
         Args:
-            s: The state from which to transition.
+            s: The state (in index format) from which to transition.
             a: The action taken in that state.
         
         Returns:
             Tuple of (next_state, reward, terminal).
         """
-        si = self.s2i(s)
+        _assert_is_index(s)
         ai = self.a2i(a)
-        if (si, ai) not in self.t:
+        if (s, ai) not in self.t:
             # If we've never seen this transition, make something up.
-            return (si, 0.0, False)
-        return self.t[(si, ai)]
+            # The only important thing is that this be terminal.
+            return (s, 0.0, True)
+        return self.t[(s, ai)]
 
     def predict(self, s):
         """Predicts the policy and value function of a state.
@@ -84,11 +100,24 @@ class TabularModel:
         This corresponds to the prediction function `f(s) -> (pi, v)`.
 
         Args:
-            s: The state for which to predict.
+            s: The state (in index format) for which to predict.
 
         Returns:
             A tuple of a policy (probability distribution over actions
             for this state), and the value of the state.
         """
-        si = self.s2i(s)
-        return scipy.stats.dirichlet.mean(self.pi[si]), self.v[si]
+        _assert_is_index(s)
+        probs = scipy.stats.dirichlet.mean(self.pi[s])
+        pi = {i: p for (i, p) in enumerate(probs)}
+        return pi, self.v[s]
+
+    def env_pi_v(self):
+        """Returns the policy and value function in environment format."""
+        v = dict()
+        pi = dict()
+        for (si, vi) in self.v.items():
+            s = self._i2s(si)
+            v[s] = vi
+            # This assumes a discrete action space.
+            pi[s] = np.argmax(self.pi[si])
+        return pi, v

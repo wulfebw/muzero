@@ -55,16 +55,17 @@ class TestRollout(unittest.TestCase):
 
 class TestSerialSampler(unittest.TestCase):
     def test_sample(self):
-        sampler = SerialSampler(max_steps=10, max_rollout_steps=10000)
-
         env = MockEnv(max_steps=4)
+        sampler = SerialSampler(env, max_steps=10, max_rollout_steps=10000)
+
         agent = MockAgent(env.action_space)
-        trajs = sampler.sample(env, agent)
+        trajs = sampler.sample(agent)
         self.assertEqual(len(trajs), 3)
         self.assertEqual(sum(len(traj["a"]) for traj in trajs), 10)
 
         env = MockEnv(max_steps=5)
-        trajs = sampler.sample(env, agent)
+        sampler = SerialSampler(env, max_steps=10, max_rollout_steps=10000)
+        trajs = sampler.sample(agent)
         self.assertEqual(len(trajs), 2)
         self.assertEqual(sum(len(traj["a"]) for traj in trajs), 10)
 

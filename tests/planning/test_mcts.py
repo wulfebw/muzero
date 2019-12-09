@@ -14,6 +14,9 @@ class LineModel:
         self.v = v
         self.pi = pi
 
+    def represent(self, s):
+        return s
+        
     def transition(self, s, a):
         transitions = self.env.transitions(s, a)
         assert len(transitions) == 1
@@ -44,7 +47,7 @@ class LineModel:
 class TestMCTS(unittest.TestCase):
     def test_on_line_env(self):
         model = LineModel()
-        planner = MCTS(model, num_simulations=100, temp=1e-8)
+        planner = MCTS(model, num_simulations=100, discount=1.0, initial_temp=1e-8, final_temp=1e-8)
         for state in range(model.env.length):
             pi, v = planner.plan(state, visualize=False)
             self.assertTrue(pi == {0: 1, 1: 0})
