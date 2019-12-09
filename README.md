@@ -2,6 +2,7 @@
 # MuZero
 - A tabular implementation of [MuZero](https://arxiv.org/pdf/1911.08265.pdf) compatible with [gym](https://github.com/openai/gym).
   - To elaborate on that: the current implementation uses the policy iteration update rule of MuZero (via MCTS), but instead of using function approximation (e.g., a neural network) for the learned model, a simple table is used.
+- I'm planning to add a version with a neural network model in the future
   
  # Getting Started
  - To be added.
