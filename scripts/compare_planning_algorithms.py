@@ -1,5 +1,6 @@
 from muzero.envs.maze import Maze
 from muzero.datasets.tabular_dataset import TabularDataset
+from muzero.loggers import SimpleLogger
 from muzero.models.tabular_model import TabularModel
 from muzero.planning.mcts import MCTS
 from muzero.planning.value_iteration import value_iteration
@@ -13,7 +14,8 @@ def run_value_iteration(env):
     return v, pi
 
 
-def run_muzero(env, total_steps=20000, steps_per_update=100, num_mcts_simulations=20, return_n=4):
+def run_muzero(env, log_dir, total_steps=50000, steps_per_update=100, num_mcts_simulations=20, return_n=4):
+    max_steps = total_steps // steps_per_update
     model = TabularModel(env.observation_space, env.action_space)
     planner = MCTS(model,
                    num_simulations=num_mcts_simulations,
@@ -22,8 +24,9 @@ def run_muzero(env, total_steps=20000, steps_per_update=100, num_mcts_simulation
     dataset = TabularDataset(return_n=return_n, discount=env.discount)
     agent = TabularMuZero(model, planner, dataset)
     sampler = SerialSampler(env, max_steps=steps_per_update, max_rollout_steps=50)
-    trainer = SimpleTrainer(sampler, agent)
-    trainer.train(total_steps // steps_per_update)
+    logger = SimpleLogger(log_dir, max_steps, print_env_info_every=20)
+    trainer = SimpleTrainer(sampler, agent, logger=logger)
+    trainer.train(max_steps)
     pi, v = model.env_pi_v()
     return v, pi
 
@@ -31,9 +34,12 @@ def run_muzero(env, total_steps=20000, steps_per_update=100, num_mcts_simulation
 def main():
     env = Maze()
     vi_v, _ = run_value_iteration(env)
-    mu_v, _ = run_muzero(env)
-    env.render_value_function(vi_v, mode="text")
-    env.render_value_function(mu_v, mode="text")
+    num_experiments = 1
+    for i in range(num_experiments):
+        log_dir = "../data/gif_{}".format(i)
+        mu_v, _ = run_muzero(env, log_dir)
+        env.render_value_function(vi_v, mode="text")
+        env.render_value_function(mu_v, mode="text")
 
 
 if __name__ == "__main__":

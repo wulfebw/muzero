@@ -143,12 +143,14 @@ class Maze(gym.Env):
             print()
         print()
 
-    def render_value_function(self, v, mode="image"):
+    def render_value_function(self, v, mode="image", filepath=None):
         """Visualize a value function for this maze.
 
         Args:
             v: Dictionary mapping states to values.
             mode: The render mode; either "text" or "image".
+            filepath: An optional filepath to direct output to if provided.
+                This only works with the plot / image visualization.
         """
         viz = np.empty((self.height, self.length))
         for state, value in v.items():
@@ -160,7 +162,11 @@ class Maze(gym.Env):
             # Normalize to within colormap bounds.
             viz = (viz - np.min(viz)) / np.ptp(viz)
             plt.imshow(viz, cmap="jet")
-            plt.show()
+            if filepath is not None:
+                plt.savefig(filepath)
+                plt.close()
+            else:
+                plt.show()
         else:
             raise NotImplementedError("Invalid mode: {}".format(mode))
 
