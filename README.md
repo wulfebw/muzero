@@ -2,7 +2,7 @@
 # MuZero
 - A tabular implementation of [MuZero](https://arxiv.org/pdf/1911.08265.pdf) compatible with [gym](https://github.com/openai/gym).
   - To elaborate on that: the current implementation uses the policy iteration update rule of MuZero (via MCTS), but instead of using function approximation (e.g., a neural network) for the learned model, a simple table is used.
-- I'm planning to add a version with a neural network model in the future
+- I'm planning to add a version with a neural network model in the future.
   
  # Getting Started
  - To be added.
@@ -19,7 +19,7 @@
  - Here's a gif showing the state-value function of the learned model during training:
    - Dark red is the largest value and dark blue is the lowest value
    - The blue state in the upper right is a "pit" with -1 reward
-   - The goal state is the cell one step up and left from the bottom left corner
+   - The goal state is the cell one step up and left from the bottom right corner
    - Some state values near the pit and the exit don't converage because the agent doesn't visit them enough
  
   ![State Value](/media/value_function.gif)
