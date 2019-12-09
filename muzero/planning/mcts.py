@@ -15,7 +15,8 @@ class Edge:
         self.q = 0
 
     def __repr__(self):
-        return f"p: {self.p}\nn: {self.n}\nr: {self.r}\nq: {self.q}"
+        return "p: {}\nn: {}\nr: {}\nq: {}".format(self.p, self.n, self.r, self.q)
+
 
 class Node:
     def __init__(self, state, prior, terminal=False):
@@ -24,6 +25,9 @@ class Node:
         for action, prob in prior.items():
             self.edges[action] = Edge(prob)
         self.terminal = terminal
+
+    def __repr__(self):
+        return "{}".format(self.state)
 
     def add_to_graph(self, g):
         edge_labels = dict()
@@ -40,21 +44,41 @@ class Node:
 
 class MCTS(OnlinePlanningAlgorithm):
     """An implementation of Monte Carlo Tree Search specific to the MuZero case."""
-    def __init__(self, model, num_simulations, c1=1.25, c2=20000, temp=1.0):
+
+    def __init__(self,
+                 model,
+                 num_simulations,
+                 discount,
+                 c1=1.25,
+                 c2=20000,
+                 initial_temp=10.0,
+                 final_temp=0.01,
+                 num_temp_steps=1000):
         self.model = model
         self.num_simulations = num_simulations
+        self.discount = discount
         self.c1 = c1
         self.c2 = c2
-        self.temp = temp
+
+        # Update the action-selection temperature over time.
+        # The paper uses a step update (appendix d), but we use an exponential decay.
+        self.initial_temp = initial_temp
+        self.final_temp = final_temp
+        # Solve for a value of gamma that results in an exponential decay
+        # to the final temperature by the provided number of timesteps.
+        self.gamma = np.exp(np.log(final_temp / initial_temp) / num_temp_steps)
+        self.num_steps = 0
 
     def plan(self, state, visualize=False):
         """See base class documentation."""
-        prior, _ = self.model.predict(state)
-        root = Node(state, prior)
+        si = self.model.represent(state)
+        prior, _ = self.model.predict(si)
+        root = Node(si, prior)
         for sim in range(self.num_simulations):
             self._simulate(root)
         if visualize:
             self._visualize(root)
+        self.num_steps += 1
         return self._get_pi_v(root)
 
     def _uct_action(self, node):
@@ -83,28 +107,39 @@ class MCTS(OnlinePlanningAlgorithm):
             pi, v = self.model.predict(sp)
             node.edges[a].r = r
             node.edges[a].child = Node(sp, pi, t)
-            g = r + self.model.discount * v * (0 if t else 1)
+            g = r + self.discount * v * (0 if t else 1)
         else:
             # Action previously selected; recurse simulation deterministically.
-            g = node.edges[a].r + self.model.discount * self._simulate(node.edges[a].child)
+            g = node.edges[a].r + self.discount * self._simulate(node.edges[a].child)
 
         node.edges[a].q = (node.edges[a].n * node.edges[a].q + g) / (node.edges[a].n + 1)
         node.edges[a].n += 1
         return g
 
+    def _temp(self):
+        return max(self.final_temp, self.initial_temp * self.gamma**self.num_steps)
+
     def _softmax(self, scores):
+        temp = self._temp()
         max_score = max(v for v in scores.values())
-        total = sum(np.exp((v - max_score) / self.temp) for v in scores.values())
+        total = sum(np.exp((v - max_score) / temp) for v in scores.values())
         result = dict()
         for k, v in scores.items():
-            result[k] = np.exp((v - max_score) / self.temp) / total
+            result[k] = np.exp((v - max_score) / temp) / total
         return result
 
     def _get_pi_v(self, root):
-        # The policy is determined by the visit counts rather than the state-action value (appendix d).
-        pi = self._softmax({a: edge.n for (a, edge) in root.edges.items()})
+        # In the paper, they use the action selection count (which would be `edge.n`
+        # in this implementation) in the softmax (appendix d), but in the tabular
+        # case this seems to limit exploration too quickly. Instead we use the
+        # Q-values and have a smaller final temperature.
+        pi = self._softmax({a: edge.q for (a, edge) in root.edges.items()})
         v = sum(prob * root.edges[a].q for (a, prob) in pi.items())
         return pi, v
+
+    def info(self):
+        """Returns information about planning for logging."""
+        return dict(temp=self._temp())
 
     def _visualize(self, root, filepath="/tmp/graph{}.png".format(np.random.randint(1e8))):
         g = nx.Graph()

@@ -19,7 +19,7 @@ class TestValueIteration(unittest.TestCase):
         _, _, v, pi = value_iteration(env, max_iter=100, verbose=False)
         self.assertAlmostEqual(v[(4, 4)], 1)
         self.assertAlmostEqual(v[(5, 0)], -1)
-        self.assertAlmostEqual(v[(0, 0)], env.discount**7, 6)
+        self.assertAlmostEqual(v[(0, 0)], env.discount**8, 6)
 
 
 if __name__ == '__main__':

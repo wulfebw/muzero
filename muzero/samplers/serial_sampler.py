@@ -45,21 +45,23 @@ def rollout(env, agent, max_steps):
 class SerialSampler:
     """A sampler that serially samples trajectories from an environment."""
 
-    def __init__(self, max_steps, max_rollout_steps):
+    def __init__(self, env, max_steps, max_rollout_steps=1e10):
         """
         Args:
+            env: The environment to sample from.
             max_steps: The max steps to take total per sample call.
             max_rollout_steps: The max steps to take within a single rollout.
         """
+        self.env = env
         self.max_steps = max_steps
         self.max_rollout_steps = max_rollout_steps
 
-    def sample(self, env, agent):
+    def sample(self, agent):
         trajs = []
         num_steps = 0
         while num_steps < self.max_steps:
             steps_left = self.max_steps - num_steps
-            traj = rollout(env, agent, min(self.max_rollout_steps, steps_left))
+            traj = rollout(self.env, agent, min(self.max_rollout_steps, steps_left))
             trajs.append(traj)
             num_steps += len(traj["a"])
         return trajs

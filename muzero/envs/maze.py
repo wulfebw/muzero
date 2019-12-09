@@ -121,8 +121,12 @@ class Maze(gym.Env):
         return 0, False
 
     def step(self, action):
-        self.state = self._get_next_state(action)
+        # By computing the reward / terminal when actually in a terminal state,
+        # we allow an agent to take an action in the terminal state. This
+        # does not influence the policy, but it makes it easier to compare
+        # value functions across algorithms.
         reward, terminal = self._get_reward_terminal(self.state)
+        self.state = self._get_next_state(action)
         return self.state, reward, terminal, dict()
 
     def transitions(self, state, action):
@@ -153,9 +157,7 @@ class Maze(gym.Env):
         if mode == "text":
             print(viz)
         elif mode == "image":
-            # This transform makes for a clearer visualization by spreading out the values.
-            # If the reward values are changed to something other than plus/minus 1 this won't work.
-            viz = viz**19
+            # Normalize to within colormap bounds.
             viz = (viz - np.min(viz)) / np.ptp(viz)
             plt.imshow(viz, cmap="jet")
             plt.show()
