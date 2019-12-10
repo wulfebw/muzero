@@ -12,7 +12,7 @@
  - Here's a graph showing average discounted return during training: 
    - Averaged across 10 training runs
    - Standard deviation across runs shown in lighter color
-   - The actual return is sometimes larger than the optimal expected return because the initial state is random
+   - The algorithm doesn't quite reach optimal performance. This might be because the exploration doesn't reach zero, because it learns a suboptimal value / policy for some of the initial states due to a lack of exploration, or because there's a bug (need to investigate)
   
  ![Average Discounted Return](/media/average_discounted_return.png)
  
