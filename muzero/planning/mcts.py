@@ -52,7 +52,7 @@ class MCTS(OnlinePlanningAlgorithm):
                  c1=1.25,
                  c2=20000,
                  initial_temp=10.0,
-                 final_temp=0.01,
+                 final_temp=0.0001,
                  num_temp_steps=1000):
         self.model = model
         self.num_simulations = num_simulations

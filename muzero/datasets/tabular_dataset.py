@@ -14,7 +14,7 @@ class TabularDataset:
         samples = []
         for traj in trajectories:
             samples.extend(self._traj_to_samples(traj))
-        return samples, self._get_info(samples)
+        return samples, self._get_info(trajectories, samples)
 
     def _traj_to_samples(self, traj):
         length = len(traj["a"])
@@ -42,6 +42,10 @@ class TabularDataset:
             ))
         return samples
 
-    def _get_info(self, samples):
-        avg_return = sum(s[-1] for s in samples) / (len(samples) + 1e-8)
-        return dict(avg_discounted_return=avg_return)
+    def _get_info(self, trajectories, samples):
+        if len(trajectories) == 0:
+            return {}
+        avg_return = 0
+        for traj in trajectories:
+            avg_return += sum(r * self.discount**i for (i, r) in enumerate(traj["r"]))
+        return dict(avg_discounted_return=avg_return / len(trajectories))

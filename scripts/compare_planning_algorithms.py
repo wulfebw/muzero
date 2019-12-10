@@ -14,7 +14,7 @@ def run_value_iteration(env):
     return v, pi
 
 
-def run_muzero(env, log_dir, total_steps=50000, steps_per_update=100, num_mcts_simulations=20, return_n=4):
+def run_muzero(env, log_dir, total_steps=50000, steps_per_update=100, num_mcts_simulations=50, return_n=4):
     max_steps = total_steps // steps_per_update
     model = TabularModel(env.observation_space, env.action_space)
     planner = MCTS(model,
@@ -34,9 +34,9 @@ def run_muzero(env, log_dir, total_steps=50000, steps_per_update=100, num_mcts_s
 def main():
     env = Maze()
     vi_v, _ = run_value_iteration(env)
-    num_experiments = 1
+    num_experiments = 10
     for i in range(num_experiments):
-        log_dir = "../data/gif_{}".format(i)
+        log_dir = "../data/muzero_{}".format(i)
         mu_v, _ = run_muzero(env, log_dir)
         env.render_value_function(vi_v, mode="text")
         env.render_value_function(mu_v, mode="text")
