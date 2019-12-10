@@ -11,7 +11,7 @@ def _assert_is_index(v):
 
 
 class TabularModel:
-    def __init__(self, observation_space, action_space, value_lr=0.1):
+    def __init__(self, observation_space, action_space, value_lr=0.05):
         """
         Args:
             observation_space: The observation space of the environment.
