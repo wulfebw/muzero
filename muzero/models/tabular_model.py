@@ -118,6 +118,5 @@ class TabularModel:
         for (si, vi) in self.v.items():
             s = self._i2s(si)
             v[s] = vi
-            # This assumes a discrete action space.
             pi[s] = np.argmax(self.pi[si])
         return pi, v

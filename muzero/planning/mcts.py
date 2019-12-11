@@ -30,6 +30,7 @@ class Node:
         return "{}".format(self.state)
 
     def add_to_graph(self, g):
+        """This is used for visualization purposes only."""
         edge_labels = dict()
         for a, edge in self.edges.items():
             if edge.child is not None:
