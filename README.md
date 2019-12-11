@@ -12,17 +12,21 @@
  - Here's a graph showing average discounted return during training: 
    - Averaged across 10 training runs
    - Standard deviation across runs shown in lighter color
-   - The algorithm doesn't quite reach optimal performance. This might be because the exploration doesn't reach zero, because it learns a suboptimal value / policy for some of the initial states due to a lack of exploration, or because there's a bug (need to investigate)
+   - The algorithm doesn't quite reach optimal performance. This might be because the exploration doesn't reach zero, because it learns a suboptimal value / policy for some of the initial states due to a lack of exploration, or because there's a bug
   
- ![Average Discounted Return](/media/average_discounted_return.png)
+![Average Discounted Return](/media/average_discounted_return.png)
  
+ - The performance depends a fair amount on the number of Monte Carlo simulations run in choosing the action each timestep:
+
+![Monte Carlo Simulations](/media/average_discounted_return_mc.png)
+
  - Here's a gif showing the state-value function of the learned model during training:
    - Dark red is the largest value and dark blue is the lowest value
    - The blue state in the upper right is a "pit" with -1 reward
    - The goal state is the cell one step up and left from the bottom right corner
    - Some state values near the pit and the exit don't converage because the agent doesn't visit them enough
  
-  ![State Value](/media/value_function.gif)
+![State Value](/media/value_function.gif)
  
  # Implementation
 - The implementation of the algorithm is based on implementations of other algorithms in [rllab](https://github.com/rll/rllab/tree/master/rllab), which is a predecessor of [baselines](https://github.com/openai/baselines).
