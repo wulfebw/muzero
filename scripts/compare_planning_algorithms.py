@@ -34,12 +34,14 @@ def run_muzero(env, log_dir, total_steps=50000, steps_per_update=100, num_mcts_s
 def main():
     env = Maze()
     vi_v, _ = run_value_iteration(env)
-    num_experiments = 10
-    for i in range(num_experiments):
-        log_dir = "../data/muzero_{}".format(i)
-        mu_v, _ = run_muzero(env, log_dir)
-        env.render_value_function(vi_v, mode="text")
-        env.render_value_function(mu_v, mode="text")
+    for return_n in [2, 4, 8, 16]:
+        for num_sims in [5, 10, 20, 50]:
+            num_experiments = 10
+            for i in range(num_experiments):
+                log_dir = "../data/muzero_return_n_{}_num_sims_{}_run_{}".format(return_n, num_sims, i)
+                mu_v, _ = run_muzero(env, log_dir, return_n=return_n, num_mcts_simulations=num_sims)
+                env.render_value_function(vi_v, mode="text")
+                env.render_value_function(mu_v, mode="text")
 
 
 if __name__ == "__main__":
