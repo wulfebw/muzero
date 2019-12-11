@@ -14,7 +14,7 @@
    - Standard deviation across runs shown in lighter color
    - The algorithm doesn't quite reach optimal performance. This might be because the exploration doesn't reach zero, because it learns a suboptimal value / policy for some of the initial states due to a lack of exploration, or because there's a bug
   
-![Average Discounted Return](/media/average_discounted_return.png)
+![Average Discounted Return](/media/average_discounted_return_larger.png)
  
  - The performance depends a fair amount on the number of Monte Carlo simulations run in choosing the action each timestep:
 
