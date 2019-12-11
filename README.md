@@ -2,7 +2,7 @@
 # MuZero
 - A tabular implementation of [MuZero](https://arxiv.org/pdf/1911.08265.pdf) compatible with [gym](https://github.com/openai/gym).
   - To elaborate on that: the current implementation uses the policy iteration update rule of MuZero (via MCTS), but instead of using function approximation (e.g., a neural network) for the learned model, a simple table is used.
-- I'm planning to add a version with a neural network model in the future.
+- I'm planning to add in the future a version with (i) a neural network model and (ii) distributed training.
   
  # Getting Started
  - To be added.
@@ -38,3 +38,6 @@
   - Samplers: Objects that sample rollouts / trajectories from an environment when passed an agent
   - Datasets: Convert trajectories into a form useful for learning
   - Planners: Online planning algorithms used by the agents (e.g., [mcts](/muzero/planning/mcts.py)), or offline planning algorithms used for comparison (e.g., [value iteration](/muzero/planning/value_iteration.py))
+  
+# Additional Notes
+- [Why would MuZero be better than DQN?](https://wulfebw.github.io/blog/rl/muzero/muzero)
